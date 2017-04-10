@@ -36,6 +36,9 @@
     <ClInclude Include="AnalyzerDlg.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="ToolBarEx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CapturerAnalyzer.cpp">
@@ -48,6 +51,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="AnalyzerDlg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolBarEx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -69,6 +75,21 @@
       <Filter>资源文件</Filter>
     </Image>
     <Image Include="res\analyzer.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\toolbar1.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\start.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\pause.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\continue.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\end.ico">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>
