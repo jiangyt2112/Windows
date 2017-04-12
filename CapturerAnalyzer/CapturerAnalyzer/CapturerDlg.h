@@ -1,4 +1,5 @@
 #include "ToolBarEx.h"
+#include "StatusBarEx.h"
 // CapturerDlg.h : 头文件
 //
 
@@ -48,7 +49,11 @@ protected:
 	CImageList m_winImageList;             //列表视图对象  
 	CToolTipCtrl     m_winTip;
 	CReBar m_rebar;
+	CStatusBarEx m_StatusBar;
 public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 };

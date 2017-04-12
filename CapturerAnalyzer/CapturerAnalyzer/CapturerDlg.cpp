@@ -14,6 +14,7 @@
 #endif
 
 
+
 // 用于应用程序“关于”菜单项的 CAboutDlg 对话框
 
 class CAboutDlg : public CDialogEx
@@ -30,6 +31,8 @@ public:
 // 实现
 protected:
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnIdsTime();
 };
 
 CAboutDlg::CAboutDlg() : CDialogEx(CAboutDlg::IDD)
@@ -42,6 +45,7 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
+	ON_COMMAND(IDS_TIME, &CAboutDlg::OnIdsTime)
 END_MESSAGE_MAP()
 
 
@@ -79,6 +83,9 @@ BEGIN_MESSAGE_MAP(CCapturerDlg, CDialogEx)
 	ON_BN_CLICKED(IDCANCEL, &CCapturerDlg::OnBnClickedCancel)
 	ON_COMMAND(IDM_POPUP_ANA, &CCapturerDlg::OnPopupAna)
 	ON_NOTIFY_EX(TTN_NEEDTEXT,0,OnToolTipsNotify)
+	ON_WM_TIMER()
+	ON_WM_LBUTTONDBLCLK()
+	ON_WM_LBUTTONDOWN()
 END_MESSAGE_MAP()
 
 
@@ -142,31 +149,54 @@ BOOL CCapturerDlg::OnInitDialog()
 
 	m_winToolBar.ShowWindow(SW_SHOW);
 	RepositionBars(AFX_IDW_CONTROLBAR_FIRST, AFX_IDW_CONTROLBAR_LAST, 0);    //显示工具栏  
-	//m_winToolBar.MoveWindow(CRect(CPoint(1, 25), CSize(612, 45)));
-	
 
-	/*
-	if (!m_wndToolBar.CreateEx(this, TBSTYLE_FLAT,  WS_CHILD | WS_VISIBLE | CBRS_ALIGN_TOP | CBRS_GRIPPER | CBRS_TOOLTIPS,
-        CRect(4,4,4,4)) || !m_wndToolBar.LoadToolBar(IDR_TOOLBAR_MAIN))
-    {
-        TRACE0("failed to create toolbar\n");
-        return FALSE;
-    }
-	// SIZE size = {24, 24};
-	// m_wndToolBar.SetSizes(size, size);
-    m_wndToolBar.ShowWindow(SW_SHOW);
-    RepositionBars(AFX_IDW_CONTROLBAR_FIRST, AFX_IDW_CONTROLBAR_LAST, 0);
-	*/
 
 	m_winTip.Create(this); 
 	m_winTip.AddTool(GetDlgItem(IDOK), _T("你想要添加的提示信息")); //IDC_BUTTON为你要添加提示信息的LISTBOX的ID
 	
+
 	m_winTip.SetDelayTime(200); //设置延迟
 	m_winTip.SetTipTextColor( RGB(0,0,255) ); //设置提示文本的颜色
 	m_winTip.SetTipBkColor( RGB(255,255,255)); //设置提示框的背景颜色
 	m_winTip.Activate(TRUE); //设置是否启用提示
 
 	
+	//创建状态栏
+	static UINT BASED_CODE indicators[]=  
+	{
+		IDS_DIGEST,
+		IDS_STATUS,
+		IDS_PACKETS,
+		IDS_TIME
+	};  
+
+	m_StatusBar.CreateEx(this, SBT_TOOLTIPS,WS_CHILD | WS_VISIBLE | CBRS_BOTTOM,AFX_IDW_STATUS_BAR);
+	m_StatusBar.SetIndicators(indicators, sizeof(indicators)/sizeof(UINT));
+	// m_StatusBar.GetStatusBarCtrl().SetBkColor(RGB(222,0,0));
+	 //显示状态栏
+	CRect rect;
+	GetWindowRect(rect);
+	m_StatusBar.SetPaneInfo(0,indicators[0], SBPS_NORMAL, 70);//rect.Width()/3);
+	m_StatusBar.SetPaneInfo(1,indicators[1], SBPS_STRETCH, 0);
+	m_StatusBar.SetPaneInfo(2,indicators[2], SBPS_NORMAL, 150);
+	m_StatusBar.SetPaneInfo(3,indicators[3], SBPS_NORMAL, 70);
+
+	m_StatusBar.SetPaneText(0,_T("摘要"));
+	m_StatusBar.SetPaneText(1,_T("状态"));
+	m_StatusBar.SetPaneText(2,_T("捕获包数"));
+
+	// m_StatusBar.SetPaneStyle(0, RGB(0,64,128));//SetPaneBackgroundColor(0,RGB(0,64,128));
+	CTime t1;
+    t1=CTime::GetCurrentTime();
+    m_StatusBar.SetPaneText(3,t1.Format("%H:%M:%S"));
+
+	m_StatusBar.GetStatusBarCtrl().SetBkColor(RGB(180,20,180));//设置背景
+	
+	RepositionBars(AFX_IDW_CONTROLBAR_FIRST,AFX_IDW_CONTROLBAR_LAST,0);
+
+	SetTimer(1,1000,NULL);
+	
+		//SetBKColor(RGB(180,180,180));
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -355,6 +385,46 @@ BOOL CCapturerDlg::OnToolTipsNotify(UINT id, NMHDR* pNMHDR,LRESULT* pResult)
 	case IDM_STOP:
 		pT->lpszText = _T("停止捕获");
 		break;
+	
 	}
 	return FALSE;
+}
+
+
+void CCapturerDlg::OnTimer(UINT_PTR nIDEvent)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	CTime t1;
+    t1=CTime::GetCurrentTime();
+    m_StatusBar.SetPaneText(3,t1.Format("%H:%M:%S"));
+	CDialogEx::OnTimer(nIDEvent);
+}
+
+
+void CAboutDlg::OnIdsTime()
+{
+	// TODO: 在此添加命令处理程序代码
+	
+}
+
+
+void CCapturerDlg::OnLButtonDblClk(UINT nFlags, CPoint point)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	RECT rect;
+	m_StatusBar.GetStatusBarCtrl().GetRect(0, &rect);
+	if (point.x <= rect.right && point.x >= rect.left && point.y >= rect.bottom && point.y <= rect.top)
+	{
+		::MessageBox(NULL, _T("aaaa"), _T("aaa"), IDOK);
+	}
+	CDialogEx::OnLButtonDblClk(nFlags, point);
+}
+
+
+void CCapturerDlg::OnLButtonDown(UINT nFlags, CPoint point)
+{
+	// TODO: 在此添加消息处理程序代码和/或调用默认值
+	
+	//::MessageBox(NULL, _T("aaaa"), _T("aaa"), IDOK);
+	CDialogEx::OnLButtonDown(nFlags, point);
 }

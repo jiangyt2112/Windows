@@ -39,6 +39,9 @@
     <ClInclude Include="ToolBarEx.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="StatusBarEx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CapturerAnalyzer.cpp">
@@ -54,6 +57,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ToolBarEx.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="StatusBarEx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
