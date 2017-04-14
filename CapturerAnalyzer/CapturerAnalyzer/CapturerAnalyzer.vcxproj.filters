@@ -42,6 +42,21 @@
     <ClInclude Include="StatusBarEx.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="StyleListCtrl.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Packet.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Adapter.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PacketFilter.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PacketCapturer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CapturerAnalyzer.cpp">
@@ -60,6 +75,21 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="StatusBarEx.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="StyleListCtrl.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Packet.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Adapter.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PacketFilter.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PacketCapturer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,8 +1,11 @@
 #include "ToolBarEx.h"
 #include "StatusBarEx.h"
+#include "afxcmn.h"
+#include "afxwin.h"
+#include "PacketCapturer.h"
 // CapturerDlg.h : 头文件
 //
-
+#define IDD_CAPTURERANALYZER_DIALOG 102
 #pragma once
 
 // CCapturerDlg 对话框
@@ -49,6 +52,7 @@ protected:
 	CImageList m_winImageList;             //列表视图对象  
 	CToolTipCtrl     m_winTip;
 	CReBar m_rebar;
+public:
 	CStatusBarEx m_StatusBar;
 public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
@@ -56,4 +60,22 @@ public:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnEnChangeEdit2();
+protected:
+	CListCtrl m_PacketList;
+public:
+	afx_msg void OnEnChangePacketdata();
+	afx_msg void OnClickPacketlist(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnDblclkPacketlist(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnRclickPacketlist(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnHoverPacketlist(NMHDR *pNMHDR, LRESULT *pResult);
+	CEdit m_PACKETDATA;
+	afx_msg void OnLvnItemchangedPacketlist(NMHDR *pNMHDR, LRESULT *pResult);
+protected:
+	CPacketCapturer m_capturer;
+public:
+	afx_msg void OnStart();
+	afx_msg void OnPause();
+	afx_msg void OnContinue();
+	afx_msg void OnStop();
 };

@@ -14,7 +14,6 @@
 #endif
 
 
-
 // 用于应用程序“关于”菜单项的 CAboutDlg 对话框
 
 class CAboutDlg : public CDialogEx
@@ -63,13 +62,15 @@ CCapturerDlg::CCapturerDlg(CWnd* pParent /*=NULL*/)
 void CCapturerDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_PACKETLIST, m_PacketList);
+	DDX_Control(pDX, IDC_PACKETDATA, m_PACKETDATA);
 }
 
 BEGIN_MESSAGE_MAP(CCapturerDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-	ON_BN_CLICKED(IDOK, &CCapturerDlg::OnBnClickedOk)
+	//ON_BN_CLICKED(IDOK, &CCapturerDlg::OnBnClickedOk)
 	ON_WM_RBUTTONUP()
 	ON_COMMAND(IDM_ABOUTBOX, &CCapturerDlg::OnAboutbox)
 //	ON_COMMAND(IDM_CONFIG, &CCapturerDlg::OnConfig)
@@ -86,6 +87,16 @@ BEGIN_MESSAGE_MAP(CCapturerDlg, CDialogEx)
 	ON_WM_TIMER()
 	ON_WM_LBUTTONDBLCLK()
 	ON_WM_LBUTTONDOWN()
+	ON_EN_CHANGE(IDC_PACKETDATA, &CCapturerDlg::OnEnChangePacketdata)
+	ON_NOTIFY(NM_CLICK, IDC_PACKETLIST, &CCapturerDlg::OnClickPacketlist)
+	ON_NOTIFY(NM_DBLCLK, IDC_PACKETLIST, &CCapturerDlg::OnDblclkPacketlist)
+	ON_NOTIFY(NM_RCLICK, IDC_PACKETLIST, &CCapturerDlg::OnRclickPacketlist)
+	ON_NOTIFY(NM_HOVER, IDC_PACKETLIST, &CCapturerDlg::OnHoverPacketlist)
+	ON_NOTIFY(LVN_ITEMCHANGED, IDC_PACKETLIST, &CCapturerDlg::OnLvnItemchangedPacketlist)
+	ON_COMMAND(IDM_START, &CCapturerDlg::OnStart)
+	ON_COMMAND(IDM_PAUSE, &CCapturerDlg::OnPause)
+	ON_COMMAND(IDM_CONTINUE, &CCapturerDlg::OnContinue)
+	ON_COMMAND(IDM_STOP, &CCapturerDlg::OnStop)
 END_MESSAGE_MAP()
 
 
@@ -152,7 +163,7 @@ BOOL CCapturerDlg::OnInitDialog()
 
 
 	m_winTip.Create(this); 
-	m_winTip.AddTool(GetDlgItem(IDOK), _T("你想要添加的提示信息")); //IDC_BUTTON为你要添加提示信息的LISTBOX的ID
+	//m_winTip.AddTool(GetDlgItem(IDOK), _T("你想要添加的提示信息")); //IDC_BUTTON为你要添加提示信息的LISTBOX的ID
 	
 
 	m_winTip.SetDelayTime(200); //设置延迟
@@ -170,8 +181,9 @@ BOOL CCapturerDlg::OnInitDialog()
 		IDS_TIME
 	};  
 
-	m_StatusBar.CreateEx(this, SBT_TOOLTIPS,WS_CHILD | WS_VISIBLE | CBRS_BOTTOM,AFX_IDW_STATUS_BAR);
+	m_StatusBar.CreateEx(this, SBT_TOOLTIPS,/*WS_CHILD |*/ WS_VISIBLE | CBRS_BOTTOM,AFX_IDW_STATUS_BAR);
 	m_StatusBar.SetIndicators(indicators, sizeof(indicators)/sizeof(UINT));
+
 	// m_StatusBar.GetStatusBarCtrl().SetBkColor(RGB(222,0,0));
 	 //显示状态栏
 	CRect rect;
@@ -183,20 +195,44 @@ BOOL CCapturerDlg::OnInitDialog()
 
 	m_StatusBar.SetPaneText(0,_T("摘要"));
 	m_StatusBar.SetPaneText(1,_T("状态"));
-	m_StatusBar.SetPaneText(2,_T("捕获包数"));
+	m_StatusBar.SetPaneText(2,_T("000"));
 
 	// m_StatusBar.SetPaneStyle(0, RGB(0,64,128));//SetPaneBackgroundColor(0,RGB(0,64,128));
 	CTime t1;
     t1=CTime::GetCurrentTime();
     m_StatusBar.SetPaneText(3,t1.Format("%H:%M:%S"));
 
-	m_StatusBar.GetStatusBarCtrl().SetBkColor(RGB(180,20,180));//设置背景
+	// m_StatusBar.GetStatusBarCtrl().SetBkColor(RGB(180,20,180));//设置背景
 	
 	RepositionBars(AFX_IDW_CONTROLBAR_FIRST,AFX_IDW_CONTROLBAR_LAST,0);
 
 	SetTimer(1,1000,NULL);
 	
 		//SetBKColor(RGB(180,180,180));
+	// packets list
+	 //CRect rect;   
+  
+    // 获取列表视图控件的位置和大小   
+    m_PacketList.GetClientRect(&rect);   
+	//m_PacketList.SetExtendedStyle(LVS_EX_TRACKSELECT|LVS_EX_ONECLICKACTIVATE );
+    // 为列表视图控件添加全行选中和栅格风格   
+    m_PacketList.SetExtendedStyle(m_PacketList.GetExtendedStyle() | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);   
+  
+	UINT nWidth = rect.Width() - 17;
+    // 为列表视图控件添加三列   
+    m_PacketList.InsertColumn(0, _T("序号"), LVCFMT_CENTER, 80, 0);   
+    m_PacketList.InsertColumn(1, _T("时间"), LVCFMT_CENTER, 140, 1);   
+    m_PacketList.InsertColumn(2, _T("长度"), LVCFMT_CENTER, 100, 2);
+	m_PacketList.InsertColumn(3, _T("源地址"), LVCFMT_CENTER, 200, 3);
+	m_PacketList.InsertColumn(4, _T("目的地址"), LVCFMT_CENTER, 200, 4);
+	m_PacketList.InsertColumn(5, _T("协议"), LVCFMT_CENTER, 143, 5);
+	
+	// 查看主机可用适配器
+	m_capturer.findHostAdapter();
+	m_capturer.openAdapter(0);
+	m_capturer.bindListCtrl(&m_PacketList);
+	m_capturer.bindDlg(this);
+	//m_capturer.start();
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -251,7 +287,7 @@ HCURSOR CCapturerDlg::OnQueryDragIcon()
 }
 
 
-
+/*
 void CCapturerDlg::OnBnClickedOk()
 {
 	// TODO: 在此添加控件通知处理程序代码
@@ -263,7 +299,7 @@ void CCapturerDlg::OnBnClickedOk()
 	//CDialogEx::OnOK();
 	//IDOK;
 }
-
+*/
 
 void CCapturerDlg::OnRButtonUp(UINT nFlags, CPoint point)
 {
@@ -336,8 +372,12 @@ void CCapturerDlg::OnFileSaveas()
 void CCapturerDlg::OnClose()
 {
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
-
-	//CDialogEx::OnClose();
+	INT_PTR nRet = MessageBox(_T("确定关闭程序？"), _T("关闭"), MB_OKCANCEL);
+	if (nRet == IDOK)
+	{
+		m_capturer.stop();
+		CDialogEx::OnClose();
+	}
 }
 
 
@@ -427,4 +467,120 @@ void CCapturerDlg::OnLButtonDown(UINT nFlags, CPoint point)
 	
 	//::MessageBox(NULL, _T("aaaa"), _T("aaa"), IDOK);
 	CDialogEx::OnLButtonDown(nFlags, point);
+}
+
+
+void CCapturerDlg::OnEnChangeEdit2()
+{
+	// TODO:  如果该控件是 RICHEDIT 控件，它将不
+	// 发送此通知，除非重写 CDialogEx::OnInitDialog()
+	// 函数并调用 CRichEditCtrl().SetEventMask()，
+	// 同时将 ENM_CHANGE 标志“或”运算到掩码中。
+
+
+	// TODO:  在此添加控件通知处理程序代码
+}
+
+
+void CCapturerDlg::OnEnChangePacketdata()
+{
+	// TODO:  如果该控件是 RICHEDIT 控件，它将不
+	// 发送此通知，除非重写 CDialogEx::OnInitDialog()
+	// 函数并调用 CRichEditCtrl().SetEventMask()，
+	// 同时将 ENM_CHANGE 标志“或”运算到掩码中。
+
+
+	// TODO:  在此添加控件通知处理程序代码
+}
+
+
+void CCapturerDlg::OnClickPacketlist(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
+
+	
+	*pResult = 0;
+
+	CString strLangName;    // 选择语言的名称字符串   
+    NMLISTVIEW *pNMListView = (NMLISTVIEW*)pNMHDR;   
+  
+    if (-1 != pNMListView->iItem)        // 如果iItem不是-1，就说明有列表项被选择   
+    {   
+        // 获取被选择列表项第一个子项的文本   
+        strLangName = m_PacketList.GetItemText(pNMListView->iItem, 0);   
+        // 将选择的语言显示与编辑框中   
+        SetDlgItemText(IDC_PACKETDATA, strLangName);
+		//m_PacketList.SetTextColor(RGB(65,22,245));
+    }
+}
+
+
+void CCapturerDlg::OnDblclkPacketlist(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
+
+	*pResult = 0;
+	// TODO: 在此添加控件通知处理程序代码
+	*pResult = 0;
+}
+
+
+void CCapturerDlg::OnRclickPacketlist(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
+
+	*pResult = 0;
+	// TODO: 在此添加控件通知处理程序代码
+	*pResult = 0;
+}
+
+
+void CCapturerDlg::OnHoverPacketlist(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	// TODO: 在此添加控件通知处理程序代码
+	*pResult = 0;
+	m_PacketList.SetHotItem(1);
+}
+
+
+void CCapturerDlg::OnLvnItemchangedPacketlist(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
+	
+		*pResult = 0;
+	// TODO: 在此添加控件通知处理程序代码
+	*pResult = 0;
+}
+
+
+void CCapturerDlg::OnStart()
+{
+	// TODO: 在此添加命令处理程序代码
+	m_capturer.start();
+	m_StatusBar.SetPaneText(1,_T("捕获中"));
+	//m_StatusBar.SetPaneText(2,_T("10"));
+}
+
+
+void CCapturerDlg::OnPause()
+{
+	// TODO: 在此添加命令处理程序代码
+	m_capturer.pause();
+	m_StatusBar.SetPaneText(1,_T("暂停"));
+}
+
+
+
+void CCapturerDlg::OnContinue()
+{
+	// TODO: 在此添加命令处理程序代码
+	m_capturer.conti();
+	m_StatusBar.SetPaneText(1,_T("捕获中"));
+}
+
+
+void CCapturerDlg::OnStop()
+{
+	// TODO: 在此添加命令处理程序代码
+	m_capturer.stop();
 }
