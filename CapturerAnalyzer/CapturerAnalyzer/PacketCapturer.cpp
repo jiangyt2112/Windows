@@ -9,8 +9,9 @@
 
 */
 
+extern CPacketCapturer g_capturer;
 
-DWORD WINAPI ThreadProc(LPVOID lpParam)
+DWORD WINAPI CPacketCapturer::ThreadProc(LPVOID lpParam)
 {
 	//printf("thread start!\n");
 	Param* param = (Param*)lpParam;
@@ -118,13 +119,8 @@ void CPacketCapturer::clearPacket()
 	m_nums = 0;
 }
 
-bool CPacketCapturer::start()
+bool CPacketCapturer::start(int adapter)
 {
-	if (m_cur_adapter_index == -1)
-	{
-		perror("first select adapter!\n");
-		return false;
-	}
 	// 单独启动一个线程读取数据
 	
 	if (m_hThread != 0)
@@ -132,8 +128,15 @@ bool CPacketCapturer::start()
 		perror("the thread is running!\n");
 		return true;
 	}
+	g_capturer.reset();
+	bool flag = openAdapter(adapter);
+	if (flag == false)
+	{
+		MessageBox(NULL, _T("can not open adapter!"), _T("open adapter err"), IDOK);
+		return false;
+	}
 	DWORD dwThreadId;
-
+	
 	Param* param = new Param;
 	param->handle = m_adapters[m_cur_adapter_index].getHandle();
 	param->nums = &m_nums;
@@ -296,12 +299,19 @@ bool CPacketCapturer::bindListCtrl(CListCtrl* listctrl)
 	m_listctrl = listctrl;
 	return true;
 }
-class CCapturerDlg;
 
-bool CPacketCapturer::bindDlg(CCapturerDlg* dlg)
+int CPacketCapturer::getPacketsNum()const
 {
-	m_dlg = dlg;
-	//m_status->SetPaneText(2,_T("10"));
-	return true;
+	return m_nums;
 }
 
+void CPacketCapturer::reset()
+{
+	runFlag = false;
+	startFlag = false;
+	clearPacket();
+	m_read = 0;
+	m_cur_adapter_index = -1;
+	m_hThread = 0;					
+	m_listctrl->DeleteAllItems();
+}

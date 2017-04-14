@@ -16,6 +16,8 @@
 
 // 用于应用程序“关于”菜单项的 CAboutDlg 对话框
 
+CPacketCapturer g_capturer;
+
 class CAboutDlg : public CDialogEx
 {
 public:
@@ -181,7 +183,7 @@ BOOL CCapturerDlg::OnInitDialog()
 		IDS_TIME
 	};  
 
-	m_StatusBar.CreateEx(this, SBT_TOOLTIPS,/*WS_CHILD |*/ WS_VISIBLE | CBRS_BOTTOM,AFX_IDW_STATUS_BAR);
+	m_StatusBar.CreateEx(this, SBT_TOOLTIPS, WS_CHILD | WS_VISIBLE | CBRS_BOTTOM, AFX_IDW_STATUS_BAR);
 	m_StatusBar.SetIndicators(indicators, sizeof(indicators)/sizeof(UINT));
 
 	// m_StatusBar.GetStatusBarCtrl().SetBkColor(RGB(222,0,0));
@@ -228,10 +230,10 @@ BOOL CCapturerDlg::OnInitDialog()
 	m_PacketList.InsertColumn(5, _T("协议"), LVCFMT_CENTER, 143, 5);
 	
 	// 查看主机可用适配器
-	m_capturer.findHostAdapter();
-	m_capturer.openAdapter(0);
-	m_capturer.bindListCtrl(&m_PacketList);
-	m_capturer.bindDlg(this);
+	g_capturer.findHostAdapter();
+	
+	g_capturer.bindListCtrl(&m_PacketList);
+	//m_capturer.bindDlg(this);
 	//m_capturer.start();
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
@@ -375,7 +377,7 @@ void CCapturerDlg::OnClose()
 	INT_PTR nRet = MessageBox(_T("确定关闭程序？"), _T("关闭"), MB_OKCANCEL);
 	if (nRet == IDOK)
 	{
-		m_capturer.stop();
+		g_capturer.stop();
 		CDialogEx::OnClose();
 	}
 }
@@ -436,7 +438,11 @@ void CCapturerDlg::OnTimer(UINT_PTR nIDEvent)
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
 	CTime t1;
     t1=CTime::GetCurrentTime();
+	
+	wchar_t buf[32];
+	wsprintf(buf, _T("包数：%d"), g_capturer.getPacketsNum());
     m_StatusBar.SetPaneText(3,t1.Format("%H:%M:%S"));
+	m_StatusBar.SetPaneText(2, buf);
 	CDialogEx::OnTimer(nIDEvent);
 }
 
@@ -556,7 +562,7 @@ void CCapturerDlg::OnLvnItemchangedPacketlist(NMHDR *pNMHDR, LRESULT *pResult)
 void CCapturerDlg::OnStart()
 {
 	// TODO: 在此添加命令处理程序代码
-	m_capturer.start();
+	g_capturer.start(0);
 	m_StatusBar.SetPaneText(1,_T("捕获中"));
 	//m_StatusBar.SetPaneText(2,_T("10"));
 }
@@ -565,7 +571,7 @@ void CCapturerDlg::OnStart()
 void CCapturerDlg::OnPause()
 {
 	// TODO: 在此添加命令处理程序代码
-	m_capturer.pause();
+	g_capturer.pause();
 	m_StatusBar.SetPaneText(1,_T("暂停"));
 }
 
@@ -574,7 +580,7 @@ void CCapturerDlg::OnPause()
 void CCapturerDlg::OnContinue()
 {
 	// TODO: 在此添加命令处理程序代码
-	m_capturer.conti();
+	g_capturer.conti();
 	m_StatusBar.SetPaneText(1,_T("捕获中"));
 }
 
@@ -582,5 +588,7 @@ void CCapturerDlg::OnContinue()
 void CCapturerDlg::OnStop()
 {
 	// TODO: 在此添加命令处理程序代码
-	m_capturer.stop();
+	g_capturer.stop();
+	
+	m_StatusBar.SetPaneText(1,_T("停止"));
 }

@@ -72,7 +72,7 @@ public:
 	CEdit m_PACKETDATA;
 	afx_msg void OnLvnItemchangedPacketlist(NMHDR *pNMHDR, LRESULT *pResult);
 protected:
-	CPacketCapturer m_capturer;
+	
 public:
 	afx_msg void OnStart();
 	afx_msg void OnPause();

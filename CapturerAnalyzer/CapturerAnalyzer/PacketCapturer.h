@@ -21,7 +21,6 @@ typedef struct Param
 	bool *startFlag;
 	HANDLE mutex;
 	CListCtrl* listctrl;
-	CCapturerDlg* dlg;
 }Param;
 
 /* 捕获器 */
@@ -32,7 +31,7 @@ public:
 	CPacketCapturer(void);
 	/* 析构函数 */
 	~CPacketCapturer(void);
-	bool start();
+	bool start(int adapter);
 	bool pause();
 	bool conti();
 	bool stop();
@@ -41,20 +40,22 @@ public:
 	const std::vector<CPacket>& getAllPacket(int* n)const;
 	const CAdapter& getAdapter(int n)const;
 	int getAdapterNum()const;
-	bool openAdapter(int n);
 	bool saveFile(const char*);
 	void setFilterString(const char*);
 	void setFilterString(const std::string&);
 	bool openFilter();
 	bool findHostAdapter();
 	bool bindListCtrl(CListCtrl*);
-	bool CPacketCapturer::bindDlg(CCapturerDlg* dlg);
+	int getPacketsNum()const;
+	void reset();
 private:
-	
+public:
+	static DWORD WINAPI CPacketCapturer::ThreadProc(LPVOID lpParam);
 	//bool setFilter();
 	// bool useFilter();
 	// friend class CAdapter;
 private:
+	bool openAdapter(int n);
 	void freeDevice();
 	void packet_handler(u_char *param, const struct pcap_pkthdr *header, const u_char *pkt_data);
 private:
@@ -72,6 +73,5 @@ private:
 	HANDLE m_hThread;					/* 线程句柄 */
 	HANDLE m_hMutex;					/* 读写互斥锁 */
 	CListCtrl* m_listctrl;				// 列表指针
-	CCapturerDlg* m_dlg;
 };
 
